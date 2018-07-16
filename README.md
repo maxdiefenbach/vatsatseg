@@ -2,7 +2,7 @@
 
 # Description
 
-`vatsatseg` is an implementation of the matlab segmentation tool "SAT\_VAT\_segmentation" used in
+`vatsatseg` is a python implementation of the matlab segmentation tool "SAT\_VAT\_segmentation" used in
 
 *Shen, J., Baum, T., Cordes, C., Ott, B., Skurk, T., Kooijman, H., Rummeny, E. J., …, Automatic segmentation of abdominal organs and adipose tissue compartments in water-fat mri: application to weight-loss in obesity, European Journal of Radiology, 85(9), 1613–1621 (2016).*
 <http://dx.doi.org/10.1016/j.ejrad.2016.06.006>
@@ -10,13 +10,68 @@
 
 # Installation
 
-You can install `vatsatseg` by typing the following commands in your terminal.
+You can install `vatsatseg` by typing the following commands in your terminal:
 
     git clone https://github.com/maxdiefenbach/vatsatseg # clone project
     
-    cd vatsatseg                 # change directory
+    cd vatsatseg                    # change directory
     
-    pip install .                   # install package
+    pip install -e .                # install package
+
+This automatically installs the commandline tool "$ vatsatseg".
+
+
+# Dependency
+
+To manually correct the segmentation result `vatsatseg` relies on [ITK-SNAP](http://www.itksnap.org).
+By invoking the "&#x2013;show" option, the water and fat images together with the segmentation overlay will be open. For this you need to make sure the "viewer command" in the configuration file "*vatsatseg/config.ini*" points to the correct installation path of ITK-SNAP.
+
+
+# Tutorial
+
+
+## see help
+
+    vatsatseg --help
+
+    Usage: vatsatseg [OPTIONS]
+    
+      segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT) in water-fat
+      MRI images
+    
+    Options:
+      -w, --water PATH   Water MRI image file.
+      -f, --fat PATH     Fat MRI image file.
+      -o, --output PATH  Output label map file name.
+      --peel INTEGER     Number of voxels of the subcutaneous fat ring thickness.
+                         [default: 10]
+      -s, --show         Open ITK-SNAP to manually correct the labelmap.
+      -h, --help         Show this message and exit.
+
+
+## example
+
+    vatsatseg -w t1_vibe_dixon_tra_lower_W.nii \
+              -f t1_vibe_dixon_tra_lower_F.nii \
+              -o vat_sat_seg.nii \
+              -s
+
+
+# Tutorial
+
+
+## see help
+
+    python vatsatseg.py --help
+
+
+## example
+
+    python vatsatseg.py \
+           -w t1_vibe_dixon_tra_lower_W.nii \
+           -f t1_vibe_dixon_tra_lower_F.nii \
+           -o vat_sat_seg.nii \
+           -s
 
 
 # Contact
@@ -36,7 +91,7 @@ If you can contribute we are happy about pull or merge requests on [Github](http
 
 # License
 
-dicom\_helper, simple program to perform common dicom tasks
+vatsatseg, segment visceral and subcutaneous adipose tissue
 Copyright (C) 2018 Maximilian N. Diefenbach
 
 This program is free software: you can redistribute it and/or modify

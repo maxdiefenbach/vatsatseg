@@ -11,13 +11,29 @@ import os
 import configparser
 
 
-@click.command()
-@click.option('-w', '--water')
-@click.option('-f', '--fat')
-@click.option('-o', '--output')
-@click.option('--peel', default=10)
-@click.option('-s', '--show', is_flag=True)
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
+
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option('-w', '--water', type=click.Path(exists=True),
+              help='Water MRI image file.')
+@click.option('-f', '--fat', type=click.Path(exists=True),
+              help='Fat MRI image file.')
+@click.option('-o', '--output', type=click.Path(exists=False),
+              help='Output label map file name.')
+@click.option('--peel', default=10, show_default=True,
+              help='Number of voxels of the subcutaneous fat ring thickness.')
+@click.option('-s', '--show', is_flag=True,
+              help='Open ITK-SNAP to manually correct the labelmap.')
 def vat_sat_seg(water, fat, output, peel, show):
+    """
+    segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT)
+    in water-fat MRI images
+    """
+    if water is None or fat is None:
+        with click.Context(vat_sat_seg, info_name='vatsatseg') as ctx:
+            click.echo(ctx.get_help())
+            return
 
     config = configparser.ConfigParser()
     wd = os.path.dirname(__file__)
