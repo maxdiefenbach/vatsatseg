@@ -1,0 +1,40 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:nil broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:t email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:nil
+#+OPTIONS: timestamp:t title:nil toc:nil todo:t |:t
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+** Description
+   =vatsatseg= is an implementation of the matlab segmentation tool "SAT_VAT_segmentation" used in
+   
+   /Shen, J., Baum, T., Cordes, C., Ott, B., Skurk, T., Kooijman, H., Rummeny, E. J., …, Automatic segmentation of abdominal organs and adipose tissue compartments in water-fat mri: application to weight-loss in obesity, European Journal of Radiology, 85(9), 1613–1621 (2016)./
+   http://dx.doi.org/10.1016/j.ejrad.2016.06.006
+
+** Installation
+    You can install =vatsatseg= by typing the following commands in your terminal.
+
+    #+BEGIN_SRC sh
+      git clone https://github.com/maxdiefenbach/vatsatseg # clone project
+
+      cd vatsatseg                 # change directory
+
+      pip install .                   # install package
+    #+END_SRC
+
+** Contact
+   =vatsatseg= is in an early development state. We are happy about feedback and/or contributions on [[https://github.com/maxdiefenbach/vatsatseg][Github]].
+
+*** Report bugs / Request Features
+    If you can report a bug or would like to request a feature, please create an issue [[https://github.com/maxdiefenbach/vatsatseg/issues][here]].
+
+*** Contribute
+    If you can contribute we are happy about pull or merge requests on [[https://github.com/maxdiefenbach/vatsatseg][Github]].
+    
+** License
+   #+INCLUDE: "../LICENSE.txt"
+
+** Acknowlegment
+   =vatsatseg= is developed in the [[http://www.bmrrgroup.de][Body Magnetic Resonance Research Group]] at the [[http://www.mri.tum.de/][Klinikum rechts der Isar]] and the [[http://www.tum.de/][Technical University Munich]].
+
+  

@@ -1,0 +1,8 @@
+scikit_image==0.13.1
+scipy==1.0.0
+dask==0.18.1
+click==6.7
+numpy==1.14.0
+SimpleITK==1.1.0
+scikit-image==0.13.1
+scikit_learn==0.19.2

@@ -1,0 +1,14 @@
+#+TITLE: README
+#+DATE: <2018-07-16 Mon>
+#+AUTHOR: Max Diefenbach
+#+EMAIL: maximilian.diefenbach@tum.de
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:nil arch:headline author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:nil p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:nil
+#+OPTIONS: timestamp:t title:t toc:nil todo:t |:t
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 25.3.1 (Org mode 9.1.6)
+
+#+INCLUDE: "doc/doc.org" 
+
