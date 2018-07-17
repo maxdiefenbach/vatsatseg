@@ -1,17 +1,14 @@
 import numpy as np
 import SimpleITK as sitk
-from sklearn.cluster import KMeans, MiniBatchKMeans
+from sklearn.cluster import MiniBatchKMeans
 from scipy.ndimage.morphology import binary_fill_holes, binary_erosion
 from skimage.morphology import label, convex_hull_image
 from dask import delayed, compute
 from dask.distributed import Client
 import click
 import subprocess
+import os
 import configparser
-
-
-config = configparser.ConfigParser()
-config.read('config.ini')
 
 
 @click.command()
@@ -21,46 +18,51 @@ config.read('config.ini')
 @click.option('--peel', default=10)
 @click.option('-s', '--show', is_flag=True)
 def vat_sat_seg(water, fat, output, peel, show):
+
+    config = configparser.ConfigParser()
+    wd = os.path.dirname(__file__)
+    config.read(os.path.join(wd, 'config.ini'))
+
+    print('Read input. ', end='')
     Water = sitk.ReadImage(water)
     Fat = sitk.ReadImage(fat)
 
     w_img = sitk.GetArrayFromImage(Water)
     f_img = sitk.GetArrayFromImage(Fat)
+    print('Done.')
 
-    labelmap = vat_sat_seg_slice(w_img, f_img, peel)
-    # labelmap = vat_sat_seg_global(w_img, f_img, peel)
+    print('Start segmentation. ', end='')
+    labelmap = vat_sat_seg_parallel2d(w_img, f_img, peel)
+    print('Done.')
 
     label_img = sitk.GetImageFromArray(labelmap.astype(float))
     label_img.CopyInformation(Water)
         
     sitk.WriteImage(label_img, output)
-    print('Wrote "{}".'.format(output))
+    print('Wrote labelmap "{}".'.format(output))
 
     if show:
+        print('Open viewer.')
         viewer = config['viewer']
         cmd = [viewer['cmd']] + \
               viewer['opts'].format(water, fat, output,
-                                    viewer['labeldescfile']) \
+                                    os.path.join(wd, viewer['labeldescfile'])) \
                             .split(' ')
-        subprocess.Popen(cmd)
+        print('Open viewer "{}".'.format(viewer['cmd']))
+        subprocess.call(cmd)
 
 
-def vat_sat_seg_global(w_img, f_img, peel=10):
+def vat_sat_seg_parallel2d(w_img, f_img, peel=10):
     b_mask, w_mask, f_mask = kmeans(w_img, f_img)
 
-    # with Client() as client:
-    client = Client()
-
     results = []
-    for iz in range(b_mask.shape[0]):
-        results.append(delayed(get_labelmap_2d)(b_mask[iz, :, :],
-                                                w_mask[iz, :, :],
-                                                f_mask[iz, :, :],
-                                                peel))
-
-    results = compute(*results)
-
-    client.close()
+    with Client() as client:
+        for iz in range(b_mask.shape[0]):
+            results.append(delayed(get_labelmap_2d)(b_mask[iz, :, :],
+                                                    w_mask[iz, :, :],
+                                                    f_mask[iz, :, :],
+                                                    peel))
+        results = compute(*results)
 
     return np.array(results)
 
@@ -78,22 +80,16 @@ def get_labelmap_2d(b_mask, w_mask, f_mask, peel):
 
 
 def vat_sat_seg_slice(w_img, f_img, peel=10):
-    client = Client()
     
-    # with Client() as client:
     results = []
-    for iz in range(w_img.shape[0]):
-        results.append(delayed(vat_sat_seg_2d)(w_img[iz, :, :],
-                                               f_img[iz, :, :],
-                                               peel))
+    with Client() as client:
+        for iz in range(w_img.shape[0]):
+            results.append(delayed(vat_sat_seg_2d)(w_img[iz, :, :],
+                                                   f_img[iz, :, :],
+                                                   peel))
+        results = compute(*results)
 
-    results = compute(*results)
-
-    client.close()
-
-    labelmap = np.array(results)
-
-    return labelmap
+    return np.array(results)
 
 
 def vat_sat_seg_2d(w_img, f_img, peel=10):
@@ -127,6 +123,18 @@ def kmeans(w_img, f_img):
     water_mask = labelmap == labels[2]
     
     return background_mask, water_mask, fat_mask
+
+
+def get_labelmap_2d(b_mask, w_mask, f_mask, peel):
+    vat_mask, sat_mask, torso_mask = \
+                        differentiate_vat_sat(b_mask, w_mask, f_mask, peel)
+
+    labelmap = np.zeros_like(b_mask, dtype=int)
+    labelmap[w_mask & torso_mask] = 1
+    labelmap[vat_mask] = 2
+    labelmap[sat_mask] = 3
+
+    return labelmap
 
 
 def differentiate_vat_sat(background_mask, water_mask, fat_mask,
