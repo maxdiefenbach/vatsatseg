@@ -18,7 +18,8 @@ setup(
     author_email='maximilian.diefenbach@tum.de',
     url='https://github.com/maxdiefenbach/vatsatseg',
     packages=['vatsatseg'],
-    package_dir={'vatsatseg': 'vatsatseg'},
+    data_files=[('vatsatseg', ['vatsatseg/config.ini',
+                               'vatsatseg/label_desc.txt'])],
     install_requires=REQUIREMENTS,
     entry_points={
         'console_scripts': ['vatsatseg = vatsatseg:vat_sat_seg'],

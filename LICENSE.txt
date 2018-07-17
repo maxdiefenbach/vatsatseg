@@ -1,4 +1,4 @@
-dicom_helper, simple program to perform common dicom tasks
+vatsatseg, segment visceral and subcutaneous adipose tissue
 Copyright (C) 2018 Maximilian N. Diefenbach
 
 This program is free software: you can redistribute it and/or modify
