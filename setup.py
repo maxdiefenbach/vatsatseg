@@ -22,7 +22,7 @@ setup(
                                'vatsatseg/label_desc.txt'])],
     install_requires=REQUIREMENTS,
     entry_points={
-        'console_scripts': ['vatsatseg = vatsatseg:vat_sat_seg'],
+        'console_scripts': ['vatsatseg = vatsatseg:cli'],
     },
     tests_require=['pytest'],
     include_package_data=True,
