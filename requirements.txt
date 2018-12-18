@@ -1,7 +1,5 @@
 scikit_image>=0.13.1
 scipy>=1.0.0
-dask>=0.18.1
-distributed>=1.22.0
 click>=6.7
 numpy>=1.14.0
 SimpleITK>=1.0.1

@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='vatsatseg',
-    version='0.0.1',
+    version='0.0.3',
     description=('segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT)'
                  'in water-fat MRI images'),
     long_description=README,
