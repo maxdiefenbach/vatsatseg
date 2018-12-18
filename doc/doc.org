@@ -7,7 +7,7 @@
 
 ** Description
    =vatsatseg= is a python implementation of the matlab segmentation tool "SAT_VAT_segmentation" used in
-   
+
    /Shen, J., Baum, T., Cordes, C., Ott, B., Skurk, T., Kooijman, H., Rummeny, E. J., …, Automatic segmentation of abdominal organs and adipose tissue compartments in water-fat mri: application to weight-loss in obesity, European Journal of Radiology, 85(9), 1613–1621 (2016)./
    http://dx.doi.org/10.1016/j.ejrad.2016.06.006
 
@@ -19,7 +19,7 @@
 
      cd vatsatseg                    # change directory
 
-     pip install -e .                # install package
+     pip install .                # install package
    #+END_SRC
 
    This automatically installs the commandline tool "$ vatsatseg".
@@ -29,7 +29,6 @@
    By invoking the "--show" option, the water and fat images together with the segmentation overlay will be open. For this you need to make sure the "viewer command" in the configuration file "/vatsatseg/config.ini/" points to the correct installation path of ITK-SNAP.
 
 ** Tutorial
-   
 *** see help
     #+BEGIN_SRC sh :results replace verbatim :exports both
       vatsatseg --help
@@ -37,47 +36,17 @@
 
     #+RESULTS:
     #+begin_example
-      Usage: vatsatseg [OPTIONS]
+    Usage: vatsatseg [OPTIONS]
 
-        segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT) in water-fat
-        MRI images
-
-      Options:
-        -w, --water PATH   Water MRI image file.
-        -f, --fat PATH     Fat MRI image file.
-        -o, --output PATH  Output label map file name.
-        --peel INTEGER     Number of voxels of the subcutaneous fat ring thickness.
-                           [default: 10]
-        -s, --show         Open ITK-SNAP to manually correct the labelmap.
-        -h, --help         Show this message and exit.
-    #+end_example
-
-*** example
-    #+BEGIN_SRC sh
-      vatsatseg -w t1_vibe_dixon_tra_lower_W.nii \
-                -f t1_vibe_dixon_tra_lower_F.nii \
-                -o vat_sat_seg.nii \
-                -s
-    #+END_SRC
-
-** Tutorial
-   
-*** see help
-    #+BEGIN_SRC sh :results replace verbatim :exports both
-      python vatsatseg.py --help
-    #+END_SRC
-
-    #+RESULTS:
-    #+begin_example
-    Usage: vatsatseg.py [OPTIONS]
+      segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT) in water-fat
+      MRI images
 
     Options:
-      -w, --water TEXT
-      -f, --fat TEXT
-      -o, --output TEXT
-      --peel INTEGER
-      -s, --show
-      --help             Show this message and exit.
+      -w, --water PATH   Water MRI image file.
+      -f, --fat PATH     Fat MRI image file.
+      -o, --output PATH  Output label map file name.
+      -s, --show         Open ITK-SNAP to manually correct the labelmap.
+      -h, --help         Show this message and exit.
     #+end_example
 
 *** example
@@ -97,11 +66,9 @@
 
 *** Contribute
     If you can contribute we are happy about pull or merge requests on [[https://github.com/maxdiefenbach/vatsatseg][Github]].
-    
+
 ** License
    #+INCLUDE: "../LICENSE.txt"
 
 ** Acknowlegment
    =vatsatseg= is developed in the [[http://www.bmrrgroup.de][Body Magnetic Resonance Research Group]] at the [[http://www.mri.tum.de/][Klinikum rechts der Isar]] and the [[http://www.tum.de/][Technical University Munich]].
-
-  

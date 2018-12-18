@@ -13,10 +13,10 @@
 You can install `vatsatseg` by typing the following commands in your terminal:
 
     git clone https://github.com/maxdiefenbach/vatsatseg # clone project
-    
+
     cd vatsatseg                    # change directory
-    
-    pip install -e .                # install package
+
+    pip install .                # install package
 
 This automatically installs the commandline tool "$ vatsatseg".
 
@@ -35,34 +35,16 @@ By invoking the "&#x2013;show" option, the water and fat images together with th
     vatsatseg --help
 
     Usage: vatsatseg [OPTIONS]
-    
+
       segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT) in water-fat
       MRI images
-    
+
     Options:
       -w, --water PATH   Water MRI image file.
       -f, --fat PATH     Fat MRI image file.
       -o, --output PATH  Output label map file name.
-      --peel INTEGER     Number of voxels of the subcutaneous fat ring thickness.
-                         [default: 10]
       -s, --show         Open ITK-SNAP to manually correct the labelmap.
       -h, --help         Show this message and exit.
-
-
-## example
-
-    vatsatseg -w t1_vibe_dixon_tra_lower_W.nii \
-              -f t1_vibe_dixon_tra_lower_F.nii \
-              -o vat_sat_seg.nii \
-              -s
-
-
-# Tutorial
-
-
-## see help
-
-    python vatsatseg.py --help
 
 
 ## example
@@ -111,4 +93,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Acknowlegment
 
 `vatsatseg` is developed in the [Body Magnetic Resonance Research Group](http://www.bmrrgroup.de) at the [Klinikum rechts der Isar](http://www.mri.tum.de/) and the [Technical University Munich](http://www.tum.de/).
-
