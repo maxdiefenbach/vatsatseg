@@ -6,17 +6,17 @@ import logging
 import numpy as np
 import SimpleITK as sitk
 from sklearn.cluster import MiniBatchKMeans
-from scipy.ndimage.morphology import binary_dilation, binary_erosion
+from scipy.ndimage.morphology import binary_dilation
 from scipy.ndimage.morphology import binary_fill_holes, binary_opening
 from skimage.morphology import label, convex_hull_image
 from skimage.measure import regionprops
 import click
 
 
-# init logger
+# init LOGGER
 logging.basicConfig()
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -25,9 +25,9 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 # command line options
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('-w', '--water', type=click.Path(exists=True),
-              help='Water MRI image file.')
+              help='water_image MRI image file.')
 @click.option('-f', '--fat', type=click.Path(exists=True),
-              help='Fat MRI image file.')
+              help='fat_image MRI image file.')
 @click.option('-o', '--output', type=click.Path(),
               help='Output label map file name.')
 @click.option('-s', '--show', is_flag=True,
@@ -47,7 +47,7 @@ def cli(water, fat, output, show):
     if not os.path.exists(output):
         vatsatseg(water, fat, output)
     else:
-        logger.info('Output %s already exists. -> Open viewer', output)
+        LOGGER.info('Output %s already exists. -> Open viewer', output)
         show = True
 
     # open viewer (itk-snap, set path in config.ini)
@@ -70,12 +70,12 @@ def open_viewer(images, segmentation, labeldescfile=None, cmd=None, opts=None):
     """
     # read config.ini
     config = configparser.ConfigParser()
-    wd = os.path.dirname(__file__)
-    config.read(os.path.join(wd, 'config.ini'))
+    working_dir = os.path.dirname(__file__)
+    config.read(os.path.join(working_dir, 'config.ini'))
     viewer = config['viewer']
 
     if labeldescfile is None:
-        labeldescfile = os.path.join(wd, viewer.get('labeldescfile'))
+        labeldescfile = os.path.join(working_dir, viewer.get('labeldescfile'))
 
     if cmd is None:
         cmd = viewer['cmd']
@@ -83,7 +83,7 @@ def open_viewer(images, segmentation, labeldescfile=None, cmd=None, opts=None):
     if opts is None:
         opts = viewer['opts'].format(*images, segmentation, labeldescfile)
 
-    logger.info('Open viewer: "%s %s".', cmd, opts)
+    LOGGER.info('Open viewer: "%s %s".', cmd, opts)
     cmd = ([cmd] + opts.split(' '))
     subprocess.call(cmd)
 
@@ -99,35 +99,35 @@ def vatsatseg(water, fat, output, labeldict=None):
     :rtype:
 
     """
-    logger.info('Read input. ...')
-    Water = sitk.ReadImage(water)
-    Fat = sitk.ReadImage(fat)
+    LOGGER.info('Read input. ...')
+    water_image = sitk.ReadImage(water)
+    fat_image = sitk.ReadImage(fat)
 
-    w_img = sitk.GetArrayFromImage(Water)
-    f_img = sitk.GetArrayFromImage(Fat)
-    logger.info('Done.')
+    water_array = sitk.GetArrayFromImage(water_image)
+    fat_array = sitk.GetArrayFromImage(fat_image)
+    LOGGER.info('Done.')
 
     if labeldict is None:
         # read config.ini
         config = configparser.ConfigParser()
-        wd = os.path.dirname(__file__)
-        config.read(os.path.join(wd, 'config.ini'))
+        working_dir = os.path.dirname(__file__)
+        config.read(os.path.join(working_dir, 'config.ini'))
         viewer = config['viewer']
-        labeldescfile = os.path.join(wd, viewer.get('labeldescfile'))
+        labeldescfile = os.path.join(working_dir, viewer.get('labeldescfile'))
 
-        logger.info('Read labeldescfile. ...')
+        LOGGER.info('Read labeldescfile. ...')
         labeldict = read_labeldescfile(labeldescfile)
-        logger.info('Done.')
+        LOGGER.info('Done.')
 
-    logger.info('Start segmentation. ...')
-    labelmap = vatsatseg_3d(w_img, f_img, labeldict)
-    logger.info('Done.')
+    LOGGER.info('Start segmentation. ...')
+    labelmap = vatsatseg_3d(water_array, fat_array, labeldict)
+    LOGGER.info('Done.')
 
     label_img = sitk.GetImageFromArray(labelmap.astype(float))
-    label_img.CopyInformation(Water)
+    label_img.CopyInformation(water_image)
 
     sitk.WriteImage(label_img, output)
-    logger.info('Wrote labelmap "%s".', output)
+    LOGGER.info('Wrote labelmap "%s".', output)
 
 
 def read_labeldescfile(labeldescfile):
@@ -155,35 +155,35 @@ def read_labeldescfile(labeldescfile):
     return labeldict
 
 
-def vatsatseg_3d(w_img, f_img, labeldict=None):
+def vatsatseg_3d(water_array, fat_array, labeldict=None):
     """runs vatsatseg on 3d arrays slice by slice
 
     entry point for the core algorithm: use inpu water and fat arrays as two
     features for a kmeans clustering (k=3: background, water, fat).
 
-    :param w_img: 3d numpy.ndarray
-    :param f_img: 3d numpy.ndarray
+    :param water_array: 3d numpy.ndarray
+    :param fat_array: 3d numpy.ndarray
     :param labeldict:
     :returns: labelmap with 4 components: background, water, vat, sat
     :rtype: 3d numpy.ndarray
 
     """
-    slice_ = np.zeros(w_img.shape[1:])
-    labelmap = np.zeros_like(w_img, dtype=int)
+    slice_ = np.zeros(water_array.shape[1:])
+    labelmap = np.zeros_like(water_array, dtype=int)
     error_slices = []
-    for iz in range(w_img.shape[0]):
+    for iz in range(water_array.shape[0]):
         try:
-            labelmap[iz, :, :] = get_labelmap_2d(w_img[iz, :, :],
-                                                 f_img[iz, :, :],
+            labelmap[iz, :, :] = get_labelmap_2d(water_array[iz, :, :],
+                                                 fat_array[iz, :, :],
                                                  labeldict)
         except:
-            logger.info("Error at slice %s", iz)
+            LOGGER.info("Error at slice %s", iz)
             labelmap[iz, :, :] = slice_
             error_slices.append(iz)
     return labelmap
 
 
-def get_labelmap_2d(w_img, f_img, labeldict=None):
+def get_labelmap_2d(water_array, fat_array, labeldict=None):
     """after kmeans clustering of background water and fat in one slice
     run logic to differentiate vat and sat and create labelmap
 
@@ -195,12 +195,12 @@ def get_labelmap_2d(w_img, f_img, labeldict=None):
 
     """
     # kmeans clustering
-    b_mask, w_mask, f_mask = kmeans(w_img, f_img)
+    b_mask, w_mask, f_mask = kmeans(water_array, fat_array)
 
     # differentiation between vat and sat
     sat_label, sat_filled, sat_margin = get_intermediate_sat_labels(f_mask)
 
-    skintorso_mask, skin_margin, skin_filled = \
+    skintorso_mask, _, skin_filled = \
         get_intermediate_skintorso_labels(w_mask, sat_margin, sat_filled)
 
     torso_mask = get_torso_mask(skin_filled, skintorso_mask)
@@ -237,25 +237,25 @@ def get_labelmap_2d(w_img, f_img, labeldict=None):
     return labelmap
 
 
-def kmeans(w_img, f_img):
+def kmeans(water_array, fat_array):
     """perform k-means clustering with k=3 for water, fat and background
     given input arrays for water and fat,
     input arrays not rescaled (!)
 
-    :param w_img: numpy.ndarray for water images
-    :param f_img: numpy.ndarray for fat images
+    :param water_array: numpy.ndarray for water images
+    :param fat_array: numpy.ndarray for fat images
     :returns: background-, water- and fat mask
     :rtype: tuple of 3 numpy.ndarrays
 
     """
     # number of observations = number of voxels
     # two features: water, fat
-    data = np.array([w_img.ravel(), f_img.ravel()]).T
+    data = np.array([water_array.ravel(), fat_array.ravel()]).T
 
     model = MiniBatchKMeans(n_clusters=3) # background, water, fat
     model.fit(data)
 
-    sz = w_img.shape
+    sz = water_array.shape
     labelmap = model.labels_.reshape(sz)
 
     # sort clusters (labels) by water feature
@@ -277,12 +277,7 @@ def get_intermediate_sat_labels(f_mask):
 
     """
     # find sat_label
-    labels_fat = label(f_mask)
-    regions_fat = regionprops(labels_fat)
-    ind_region_sat = np.argmax([r.bbox_area for r in regions_fat
-                                if r.label != 0])
-    region_sat = regions_fat[ind_region_sat]
-    sat_label = labels_fat == region_sat.label # can include some connected vat, correct later to get sat_mask
+    sat_label = extract_largest_label(f_mask)
     # TODO: what to do if sat_label is not continuous?
     # maybe check for a label with a bbox area close to the sat_label?
 
@@ -293,6 +288,18 @@ def get_intermediate_sat_labels(f_mask):
 
     return sat_label, sat_filled, sat_margin
 
+
+def extract_largest_label(mask):
+
+    labels = label(mask)
+    regions = regionprops(labels)
+
+    areas = np.array([(r.convex_area, r.label) for r in regions
+                      if r.label != 0])
+    areas.view('i8,i8').sort(order=['f0'], axis=0) # sort by area
+    ind_largest_label = areas[-1, 1]
+
+    return labels == ind_largest_label
 
 def get_intermediate_skintorso_labels(w_mask, sat_margin, sat_filled):
     """FIXME! briefly describe function
@@ -312,7 +319,8 @@ def get_intermediate_skintorso_labels(w_mask, sat_margin, sat_filled):
     skin_margin = sat_margin
     nvoxels_skin_torso = len(np.where(sat_margin)[0])
     nvoxels_skin_torso_prev = nvoxels_skin_torso
-    nvoxel_rel_drop = np.abs(nvoxels_skin_torso - nvoxels_skin_torso_prev) / nvoxels_skin_torso_prev
+    nvoxel_rel_drop = (np.abs(nvoxels_skin_torso - nvoxels_skin_torso_prev) /
+                       nvoxels_skin_torso_prev)
     drop_ratio_thresh = 0.5
     while nvoxel_rel_drop <= drop_ratio_thresh:
         skin_filled = skin_margin | skin_filled
@@ -321,7 +329,9 @@ def get_intermediate_skintorso_labels(w_mask, sat_margin, sat_filled):
         nvoxels_skin_torso_prev = len(np.where(skin_margin)[0])
         if nvoxels_skin_torso_prev == 0:
             break
-        nvoxel_rel_drop = np.abs(nvoxels_skin_torso_prev - nvoxels_skin_torso) / nvoxels_skin_torso_prev
+        nvoxel_rel_drop = \
+            (np.abs(nvoxels_skin_torso_prev - nvoxels_skin_torso) /
+             nvoxels_skin_torso_prev)
 
     skin_filled = skin_margin | skin_filled
     skintorso_mask = (skin_margin | skin_filled) ^ sat_filled
@@ -350,14 +360,7 @@ def get_abdominal_water_mask(torso_water_mask):
     :rtype:
 
     """
-    labels_torso_water = label(torso_water_mask)
-    regions_torso_water = regionprops(labels_torso_water)
-    ind_region_torso_water = np.argmax([r.bbox_area for r in regions_torso_water
-                                        if r.label != 0])
-    vat_region = regions_torso_water[ind_region_torso_water]
-
-    abdominal_water_mask = labels_torso_water == vat_region.label
-
+    abdominal_water_mask = extract_largest_label(torso_water_mask)
     return abdominal_water_mask
 
 
@@ -370,8 +373,7 @@ def get_vat_mask(f_mask, abdominal_water_mask):
     :rtype:
 
     """
-    # TODO maybe correct convex hull problem
-    vat_mask = convex_hull_image(abdominal_water_mask) & f_mask # convex_hull introduced swapped VAT/SAT
+    vat_mask = convex_hull_image(abdominal_water_mask) & f_mask
     vat_mask = convex_hull_image(binary_opening(vat_mask)) & f_mask
     return vat_mask
 
