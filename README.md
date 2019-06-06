@@ -13,9 +13,9 @@
 You can install `vatsatseg` by typing the following commands in your terminal:
 
     git clone https://github.com/maxdiefenbach/vatsatseg # clone project
-
+    
     cd vatsatseg                    # change directory
-
+    
     pip install .                # install package
 
 This automatically installs the commandline tool "$ vatsatseg".
@@ -24,7 +24,7 @@ This automatically installs the commandline tool "$ vatsatseg".
 # Dependency
 
 To manually correct the segmentation result `vatsatseg` relies on [ITK-SNAP](http://www.itksnap.org).
-By invoking the "&#x2013;show" option, the water and fat images together with the segmentation overlay will be open. For this you need to make sure the "viewer command" in the configuration file "*vatsatseg/config.ini*" points to the correct installation path of ITK-SNAP.
+By invoking the "&#x2013;show" option, the water and fat images together with the segmentation overlay will be opened. For this you need to make sure the "viewer command" in the configuration file "*vatsatseg/config.ini*" points to the correct installation path of ITK-SNAP.
 
 
 # Tutorial
@@ -35,10 +35,10 @@ By invoking the "&#x2013;show" option, the water and fat images together with th
     vatsatseg --help
 
     Usage: vatsatseg [OPTIONS]
-
+    
       segment Visceral and Subcutaneous Adipose Tissue (VAT, SAT) in water-fat
       MRI images
-
+    
     Options:
       -w, --water PATH   Water MRI image file.
       -f, --fat PATH     Fat MRI image file.
@@ -49,7 +49,7 @@ By invoking the "&#x2013;show" option, the water and fat images together with th
 
 ## example
 
-    python vatsatseg.py \
+    vatsatseg \
            -w t1_vibe_dixon_tra_lower_W.nii \
            -f t1_vibe_dixon_tra_lower_F.nii \
            -o vat_sat_seg.nii \
@@ -74,7 +74,7 @@ If you can contribute we are happy about pull or merge requests on [Github](http
 # License
 
 vatsatseg, segment visceral and subcutaneous adipose tissue
-Copyright (C) 2018 Maximilian N. Diefenbach
+Copyright (C) 2018-2019 Maximilian N. Diefenbach
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -93,3 +93,4 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 # Acknowlegment
 
 `vatsatseg` is developed in the [Body Magnetic Resonance Research Group](http://www.bmrrgroup.de) at the [Klinikum rechts der Isar](http://www.mri.tum.de/) and the [Technical University Munich](http://www.tum.de/).
+

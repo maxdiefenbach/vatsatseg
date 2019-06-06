@@ -26,7 +26,7 @@
 
 ** Dependency
    To manually correct the segmentation result =vatsatseg= relies on [[http://www.itksnap.org][ITK-SNAP]].
-   By invoking the "--show" option, the water and fat images together with the segmentation overlay will be open. For this you need to make sure the "viewer command" in the configuration file "/vatsatseg/config.ini/" points to the correct installation path of ITK-SNAP.
+   By invoking the "--show" option, the water and fat images together with the segmentation overlay will be opened. For this you need to make sure the "viewer command" in the configuration file "/vatsatseg/config.ini/" points to the correct installation path of ITK-SNAP.
 
 ** Tutorial
 *** see help
@@ -51,7 +51,7 @@
 
 *** example
     #+BEGIN_SRC sh
-      python vatsatseg.py \
+      vatsatseg \
              -w t1_vibe_dixon_tra_lower_W.nii \
              -f t1_vibe_dixon_tra_lower_F.nii \
              -o vat_sat_seg.nii \
