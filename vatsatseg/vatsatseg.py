@@ -1,3 +1,8 @@
+import subprocess
+import os
+import re
+import configparser
+import logging
 import numpy as np
 import SimpleITK as sitk
 from sklearn.cluster import MiniBatchKMeans
@@ -6,11 +11,6 @@ from scipy.ndimage.morphology import binary_fill_holes, binary_opening
 from skimage.morphology import label, convex_hull_image
 from skimage.measure import regionprops
 import click
-import subprocess
-import os
-import re
-import configparser
-import logging
 
 
 # init logger
@@ -47,7 +47,7 @@ def cli(water, fat, output, show):
     if not os.path.exists(output):
         vatsatseg(water, fat, output)
     else:
-        logger.info(f'Output {output} already exists. -> Open viewer')
+        logger.info('Output %s already exists. -> Open viewer', output)
         show = True
 
     # open viewer (itk-snap, set path in config.ini)
@@ -83,7 +83,7 @@ def open_viewer(images, segmentation, labeldescfile=None, cmd=None, opts=None):
     if opts is None:
         opts = viewer['opts'].format(*images, segmentation, labeldescfile)
 
-    logger.info(f'Open viewer: "{cmd} {opts}".')
+    logger.info('Open viewer: "%s %s".', cmd, opts)
     cmd = ([cmd] + opts.split(' '))
     subprocess.call(cmd)
 
@@ -127,7 +127,7 @@ def vatsatseg(water, fat, output, labeldict=None):
     label_img.CopyInformation(Water)
 
     sitk.WriteImage(label_img, output)
-    logger.info('Wrote labelmap "{}".'.format(output))
+    logger.info('Wrote labelmap "%s".', output)
 
 
 def read_labeldescfile(labeldescfile):
@@ -168,11 +168,18 @@ def vatsatseg_3d(w_img, f_img, labeldict=None):
     :rtype: 3d numpy.ndarray
 
     """
+    slice_ = np.zeros(w_img.shape[1:])
     labelmap = np.zeros_like(w_img, dtype=int)
+    error_slices = []
     for iz in range(w_img.shape[0]):
-        labelmap[iz, :, :] = get_labelmap_2d(w_img[iz, :, :],
-                                             f_img[iz, :, :],
-                                             labeldict)
+        try:
+            labelmap[iz, :, :] = get_labelmap_2d(w_img[iz, :, :],
+                                                 f_img[iz, :, :],
+                                                 labeldict)
+        except:
+            logger.info("Error at slice %s", iz)
+            labelmap[iz, :, :] = slice_
+            error_slices.append(iz)
     return labelmap
 
 
