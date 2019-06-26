@@ -10,10 +10,12 @@ from scipy.ndimage.morphology import binary_dilation
 from scipy.ndimage.morphology import binary_fill_holes, binary_opening
 from skimage.morphology import label, convex_hull_image
 from skimage.measure import regionprops
+from skimage.exposure import rescale_intensity
 import click
+import traceback
 
 
-# init LOGGER
+# init logger
 logging.basicConfig()
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -103,8 +105,11 @@ def vatsatseg(water, fat, output, labeldict=None):
     water_image = sitk.ReadImage(water)
     fat_image = sitk.ReadImage(fat)
 
-    water_array = sitk.GetArrayFromImage(water_image)
-    fat_array = sitk.GetArrayFromImage(fat_image)
+    out_range = (0, 100)
+    water_array = rescale_intensity(sitk.GetArrayFromImage(water_image),
+                                    out_range=out_range)
+    fat_array = rescale_intensity(sitk.GetArrayFromImage(fat_image),
+                                  out_range=out_range)
     LOGGER.info('Done.')
 
     if labeldict is None:
@@ -173,11 +178,16 @@ def vatsatseg_3d(water_array, fat_array, labeldict=None):
     error_slices = []
     for iz in range(water_array.shape[0]):
         try:
-            labelmap[iz, :, :] = get_labelmap_2d(water_array[iz, :, :],
-                                                 fat_array[iz, :, :],
-                                                 labeldict)
-        except:
+            labelmap_2d = get_labelmap_2d(water_array[iz, :, :],
+                                          fat_array[iz, :, :],
+                                          labeldict)
+
+            labelmap[iz, :, :] = labelmap_2d
+
+        except Exception as e:
             LOGGER.info("Error at slice %s", iz)
+            traceback.print_exc()
+            print()
             labelmap[iz, :, :] = slice_
             error_slices.append(iz)
     return labelmap
@@ -283,7 +293,8 @@ def get_intermediate_sat_labels(f_mask):
 
     # check how thick the watery skin around the torso is at its thinnest location
     sat_filled = binary_fill_holes(sat_label).astype(np.int64)
-    # convex maybe hull in case sat is not continuous around the torso
+    sat_filled = convex_hull_image(sat_filled)
+
     sat_margin = binary_dilation(sat_filled) ^ sat_filled # initialization to find torso skin
 
     return sat_label, sat_filled, sat_margin
