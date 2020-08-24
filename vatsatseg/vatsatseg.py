@@ -307,7 +307,8 @@ def extract_largest_label(mask):
 
     areas = np.array([(r.convex_area, r.label) for r in regions
                       if r.label != 0])
-    areas.view('i8,i8').sort(order=['f0'], axis=0) # sort by area
+    print(areas[0].dtype)
+    areas.view('i4,i4').sort(order=['f0'], axis=0) # sort by area
     ind_largest_label = areas[-1, 1]
 
     return labels == ind_largest_label
